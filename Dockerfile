@@ -82,7 +82,7 @@ RUN ff init ethereum polygon 1 \
     --connector-config /usr/src/app/firefly-config/evmconnect.yml
 
 # List accounts
-RUN ff accounts list polygon
+#RUN ff start polygon
 
 
 # Expose the port for the Node.js application
@@ -92,8 +92,8 @@ RUN whoami
 
 # Start Docker service
 
-RUN chown ubuntu:ubuntu  /var/run/docker.sock
+#RUN chown ubuntu:ubuntu  /var/run/docker.sock
 # Define environment variable
-RUN docker ps
+#RUN docker ps
 # Start the Node.js application (replace with your startup command)
-CMD ["sh", "-c", "ff start polygon && node /usr/src/app/dist/app.js"]
+CMD ["sh", "-c", "ff start polygon & node /usr/src/app/dist/app.js"]
