@@ -1,53 +1,62 @@
-# 0. Normal dockerfile
-# 1. clone firefly repo // run firefly docker images
-# 2. firefly init
-# 3. 
-
-# Stage 1: Build the Node.js application
-FROM node:alpine as build
-
-WORKDIR /app
-
-ENV PATH /app/node_modules/.bin:$PATH
-
-COPY ./package.json /app/
-
-# Install dependencies
-RUN npm install
-
-# Copy everything to /app directory
-COPY . /app
-
-# Build the app
-RUN npm run build
-
-# Stage 2: Set up the final container
-FROM alpine:latest
+# Use the latest Ubuntu image as the base
+FROM ubuntu:latest
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Install required system packages
-RUN apk add --no-cache \
-git \
-build-base \
-curl \
-bash 
+# Install required system packages and dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    build-essential \
+    software-properties-common \
+    curl \
+    snapd \
+    bash \
+    wget \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Docker
-RUN apk add --no-cache docker
+# Download the setup.sh script from the given URL
+# RUN touch /app/setup.sh
+# RUN curl -fsSL https://gist.githubusercontent.com/rohitroyrr8/6115f4295345203b7d443cab536ed6ab/raw/4f2cb341d91426ca7169f2ab1e696078b3305ce9/setup.sh | bash
 
+# Add Docker's official GPG key
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+# Set up the Docker repository
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# Install Docker Engine
+RUN apt-get update \
+    && apt-get install -y docker-ce docker-ce-cli containerd.io
+
+RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose
+
+# Verify Docker and Docker Compose installations
 RUN docker --version
-
-
-# https://github.com/docker/compose/releases/download/v2.28.0/docker-compose-linux-x86_64
-# Install Docker Compose
-# Example Dockerfile using pre-built Docker Compose image
-# FROM docker/compose:1.29.2
-RUN wget https://github.com/docker/compose/releases/download/v2.28.0/docker-compose-linux-x86_64 -O /usr/local/bin/docker-compose
-RUN chmod +x /usr/local/bin/docker-compose
-
 RUN docker-compose --version
+
+# Install Node.js
+# RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+#     && apt-get install -y nodejs
+#RUN nvm install 18
+
+# Copy the application files
+COPY . /usr/src/app
+
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+RUN node --version \
+    && npm --version 
+
+# Install Node.js dependencies
+RUN npm install
+
+# Build the Node.js application
+RUN npm run build
 
 # Download and install FireFly CLI
 RUN wget https://github.com/hyperledger/firefly-cli/releases/download/v1.3.0/firefly-cli_1.3.0_Linux_x86_64.tar.gz && \
@@ -57,28 +66,34 @@ RUN wget https://github.com/hyperledger/firefly-cli/releases/download/v1.3.0/fir
 # Verify FireFly installation
 RUN ff version
 
-# Copy the built Node.js application from the previous stage
-COPY --from=build /app /usr/src/app
-
 # Create a directory for FireFly initialization
 RUN mkdir /usr/src/app/firefly-config
 
 # Add your EVM connector config file to the container
 COPY evmconnect.yml /usr/src/app/firefly-config/
 
-# Initialize FireFly
+# Initialize FireFly (if needed)
 RUN ff init ethereum polygon 1 \
     --multiparty=false \
+    --ipfs-mode public \
     -n remote-rpc \
     --remote-node-url https://polygon-amoy.g.alchemy.com/v2/1i-JadBalM7Dp1PnYL76aG1vREB_yfGp \
     --chain-id 80002 \
-    --connector-config /usr/src/app/firefly-config/evmconnect.yml \
-    --verbose
+    --connector-config /usr/src/app/firefly-config/evmconnect.yml
+
+# List accounts
+RUN ff accounts list polygon
+
 
 # Expose the port for the Node.js application
 EXPOSE 3000
 
-# Define environment variable
+RUN whoami
 
-# Start both FireFly and the Node.js application
+# Start Docker service
+
+RUN chown ubuntu:ubuntu  /var/run/docker.sock
+# Define environment variable
+RUN docker ps
+# Start the Node.js application (replace with your startup command)
 CMD ["sh", "-c", "ff start polygon && node /usr/src/app/dist/app.js"]
