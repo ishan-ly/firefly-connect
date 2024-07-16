@@ -37,7 +37,4 @@ export default function entryPoint(app : express.Application) {
         const response: any = await new DeployService().invokeContract(req);
         return res.status(response.status).send(response);
     });
-
-
-
 }

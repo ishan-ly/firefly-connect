@@ -12,6 +12,7 @@ RUN apt-get update && \
     software-properties-common \
     curl \
     snapd \
+    openssl \
     bash \
     wget \
     python3 \
@@ -26,7 +27,9 @@ RUN apt-get update && \
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
 # Set up the Docker repository
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN ARCH=$(dpkg --print-architecture); \
+    add-apt-repository "deb [arch=${ARCH}] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
 # Install Docker Engine
 RUN apt-get update \
     && apt-get install -y docker-ce docker-ce-cli containerd.io
@@ -59,9 +62,9 @@ RUN npm install
 RUN npm run build
 
 # Download and install FireFly CLI
-RUN wget https://github.com/hyperledger/firefly-cli/releases/download/v1.3.0/firefly-cli_1.3.0_Linux_x86_64.tar.gz && \
-    tar -zxf firefly-cli_1.3.0_Linux_x86_64.tar.gz -C /usr/local/bin ff && \
-    rm firefly-cli_1.3.0_Linux_x86_64.tar.gz
+RUN wget "https://github.com/hyperledger/firefly-cli/releases/download/v1.3.0/firefly-cli_1.3.0_$(uname -s)_$(uname -m).tar.gz" && \
+    tar -zxf "firefly-cli_1.3.0_$(uname -s)_$(uname -m).tar.gz" -C /usr/local/bin ff && \
+    rm "firefly-cli_1.3.0_$(uname -s)_$(uname -m).tar.gz"
 
 # Verify FireFly installation
 RUN ff version
@@ -81,19 +84,8 @@ RUN ff init ethereum polygon 1 \
     --chain-id 80002 \
     --connector-config /usr/src/app/firefly-config/evmconnect.yml
 
-# List accounts
-#RUN ff start polygon
-
-
 # Expose the port for the Node.js application
 EXPOSE 3000
 
-RUN whoami
-
-# Start Docker service
-
-#RUN chown ubuntu:ubuntu  /var/run/docker.sock
-# Define environment variable
-#RUN docker ps
 # Start the Node.js application (replace with your startup command)
-CMD ["sh", "-c", "ff start polygon & node /usr/src/app/dist/app.js"]
+CMD ["sh", "-c", "dockerd & sleep 10 && ff start polygon && node /usr/src/app/dist/app.js"]
