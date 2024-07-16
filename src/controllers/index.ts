@@ -37,4 +37,23 @@ export default function entryPoint(app : express.Application) {
         const response: any = await new DeployService().invokeContract(req);
         return res.status(response.status).send(response);
     });
+
+    // getwebui
+    app.get('/v1/contract/ui', async function (req: express.Request, res: express.Response) {
+        const response: any = await new DeployService().getWebUI(req);
+        return res.status(200).send(response);
+    });
+
+    // getswaggerui
+    app.get('/v1/contract/api', async function (req: express.Request, res: express.Response) {
+        const response: any = await new DeployService().getSwaggerUI(req);
+        return res.status(200).send(response);
+    });
+
+    //getSandboxUI
+    app.get('/v1/contract/sandboxui', async function (req: express.Request, res: express.Response) {
+        const response: any = await new DeployService().getSandboxUI(req);
+        return res.status(200).send(response);
+    });
+
 }

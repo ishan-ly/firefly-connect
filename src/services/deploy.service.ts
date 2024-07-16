@@ -93,4 +93,34 @@ export class DeployService {
             return CommonUtils.prepareErrorMessage(error);
         }
     }
+
+    public async getWebUI(req : any) {
+        const response = await axios.request(
+            {
+                method: 'get',
+                url: `http://127.0.0.1:5000/ui`
+            }
+        )   
+        return response.data;
+    }
+
+    public async getSwaggerUI(req : any) {
+        const response = await axios.request(
+            {
+                method: 'get',
+                url: `http://127.0.0.1:5000/api/v1/namespaces/default/apis/simple-storage/api`
+            }
+        )   
+        return response.data;
+    }
+
+    public async getSandboxUI(req : any) {
+        const response = await axios.request(
+            {
+                method: 'get',
+                url: `http://localhost:5109/`
+            }
+        )   
+        return response.data;
+    }
 }
