@@ -24,6 +24,7 @@
     "log4js": "^6.9.1",
     "mongodb": "^6.5.0",
     "node-cron": "^3.0.3",
+    "pm2": "^5.4.2",
     "solc": "^0.8.23-fixed",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

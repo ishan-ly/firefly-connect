@@ -24,6 +24,12 @@ Go to the project directory
   cd firefly-connect
 ```
 
+Copy .env
+
+```bash
+  cp .env.example .env
+```
+
 Install docker
 
 ```bash
@@ -50,6 +56,7 @@ Install dependencies
 ```
 
 Download and install FireFly CLI
+
 ```bash
   wget "https://github.com/hyperledger/firefly-cli/releases/download/v1.3.0/firefly-cli_1.3.0_$(uname -s)_$(uname -m).tar.gz" && \
     tar -zxf "firefly-cli_1.3.0_$(uname -s)_$(uname -m).tar.gz" -C /usr/local/bin ff && \
@@ -58,10 +65,12 @@ Download and install FireFly CLI
 ```
 
 Copy evmconnect.yml
+
 ```bash
   cp evmconnect.yml ~/Desktop/evmconnect.yml
 ```
 Initialize Firefly
+
 ```bash
   ff init ethereum polygon 1 \
     --multiparty=false \
@@ -72,13 +81,14 @@ Initialize Firefly
 ```
 
 Start FireFly stack
+
 ```bash
   ff start polygon
 ```
 
 Build
+
 ```bash
-  cp .env.exmaple .env
   npm run build
 ```
 
@@ -95,10 +105,16 @@ Building docker image
 ```bash
 aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 827830277284.dkr.ecr.me-south-1.amazonaws.com
 
-docker build -t 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0 . --args RPC_URL https://polygon-amoy.g.alchemy.com/v2/1i-JadBalM7Dp1PnYL76aG1vREB_yfGp --args STACK_NAME polygon
+docker build -t 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0 . --build-arg RPC_URL=https://polygon-amoy.g.alchemy.com/v2/1i-JadBalM7Dp1PnYL76aG1vREB_yfGp --build-arg STACK_NAME=polygon --no-cache --progress=plain
 
 docker push 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0
 
+```
+
+Running docker image 
+
+```bash
+  docker run -p 3000:3000 -p 5000:5000 -p 5109:5109 --privileged --name firefly-app 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0
 ```
 
 ## Environment Variables
@@ -110,12 +126,6 @@ To run this project, you will need to add the following environment variables to
 ## Appendix
 
 - Run the command ```ff accounts list polygon ``` to list all the available wallets. Fund the default account with some MATIC.
-
-
-
-
-## addtionla items
-- use pm2 for node service
-- user multiple port to expose [ui]
-- use args before generating `docker images` and run `docker run`
-- validate your deploy contract, interface and write/read tx
+- Web UI - http://localhost:5000/ui
+- Sandbox UI - http://localhost:5109
+- Swagger API UI - http://localhost:5000/api
