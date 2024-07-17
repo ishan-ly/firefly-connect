@@ -78,6 +78,7 @@ Start FireFly stack
 
 Build
 ```bash
+  cp .env.exmaple .env
   npm run build
 ```
 
@@ -94,9 +95,10 @@ Building docker image
 ```bash
 aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 827830277284.dkr.ecr.me-south-1.amazonaws.com
 
-docker build -t 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0 .
+docker build -t 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0 . --args RPC_URL https://polygon-amoy.g.alchemy.com/v2/1i-JadBalM7Dp1PnYL76aG1vREB_yfGp --args STACK_NAME polygon
 
 docker push 827830277284.dkr.ecr.me-south-1.amazonaws.com/firefly-connect:v1.0
+
 ```
 
 ## Environment Variables
@@ -108,3 +110,12 @@ To run this project, you will need to add the following environment variables to
 ## Appendix
 
 - Run the command ```ff accounts list polygon ``` to list all the available wallets. Fund the default account with some MATIC.
+
+
+
+
+## addtionla items
+- use pm2 for node service
+- user multiple port to expose [ui]
+- use args before generating `docker images` and run `docker run`
+- validate your deploy contract, interface and write/read tx

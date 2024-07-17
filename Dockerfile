@@ -56,6 +56,7 @@ RUN node --version \
     && npm --version 
 
 # Install Node.js dependencies
+RUN cp .env.example .env
 RUN npm install
 
 # Build the Node.js application
@@ -74,13 +75,14 @@ RUN mkdir /usr/src/app/firefly-config
 
 # Add your EVM connector config file to the container
 COPY evmconnect.yml /usr/src/app/firefly-config/
+ARG $RPC_URL
 
 # Initialize FireFly (if needed)
 RUN ff init ethereum polygon 1 \
     --multiparty=false \
     --ipfs-mode public \
     -n remote-rpc \
-    --remote-node-url https://polygon-amoy.g.alchemy.com/v2/1i-JadBalM7Dp1PnYL76aG1vREB_yfGp \
+    --remote-node-url $RCP_URL  \
     --chain-id 80002 \
     --connector-config /usr/src/app/firefly-config/evmconnect.yml
 
